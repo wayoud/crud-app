@@ -1,66 +1,63 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Module de Paiement en Ligne
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Ce module de paiement en ligne a été développé pour intégrer les systèmes de paiement Stripe et PayPal dans un magasin en ligne. Le module est conçu pour utiliser les traits fournis par les SDK StripeTrait et PaypalTrait, qui contiennent les fonctions nécessaires pour traiter les paiements et récupérer les détails des transactions.
 
-## About Laravel
+## Sécurité
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Pour assurer la sécurité des informations sensibles telles que les numéros de carte de crédit, le module utilise le chiffrement fourni par Laravel. Les numéros de carte sont encryptés avant d'être transmis aux SDK Stripe et PayPal.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Adaptation des SDK
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Le code suppose que les SDK Stripe et PayPal fournissent des fonctions telles que stripePaymentProcess, stripeGetPayment, paypalPaymentProcess et paypalGetPayment. Assurez-vous d'adapter le code en fonction des méthodes réelles fournies par les SDK.
 
-## Learning Laravel
+## Gestion des Erreurs
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Le code inclut une gestion d'erreur de base pour les fournisseurs de paiement invalides. Des améliorations peuvent être apportées à la gestion des erreurs en fonction des cas d'utilisation spécifiques et des problèmes potentiels pouvant survenir lors du traitement des paiements.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Utilisation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Initialisation
 
-## Laravel Sponsors
+```php
+use App\PaymentModule;
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+// Initialiser le module de paiement
+$paymentModule = new PaymentModule();
+```
 
-### Premium Partners
+// Exemple de transaction Stripe
+$result = $paymentModule->processPayment('stripe', 150.00, 'USD', '4242424242424242');
+$stripePaymentId = $result['paymentId'];
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+// Récupération des détails de paiement Stripe
+$stripeDetails = $paymentModule->getPaymentDetails('stripe', $stripePaymentId);
 
-## Contributing
+// Exemple de transaction PayPal
+$result = $paymentModule->processPayment('paypal', 200.00, 'EUR', '4000056655665556');
+$paypalPaymentId = $result['paymentId'];
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+// Récupération des détails de paiement PayPal
+$paypalDetails = $paymentModule->getPaymentDetails('paypal', $paypalPaymentId);
+namespace App;
 
-## Code of Conduct
+class PaymentModule {
+use StripeTrait, PaypalTrait;
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    public function processPayment($provider, $amount, $currency, $cardNumber) {
+        // ...
+    }
 
-## Security Vulnerabilities
+    public function getPaymentDetails($provider, $paymentId) {
+        // ...
+    }
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+}
+namespace App\Traits;
 
-## License
+trait StripeTrait {
+// Méthodes pour traiter les paiements et récupérer les détails des transactions Stripe
+}
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+trait PaypalTrait {
+// Méthodes pour traiter les paiements et récupérer les détails des transactions PayPal
+}
